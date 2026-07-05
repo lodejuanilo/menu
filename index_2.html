@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0f0b08">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="apple-touch-icon" href="logo.png">
+    <title>Nuestro Menú</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Rye&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #0f0b08; 
+            --text-main: #ffffff;
+            --text-muted: #cccccc;
+            --accent: #f37021; 
+            --accent-hover: #ff8137;
+            --chalk-line: rgba(255, 255, 255, 0.85); 
+            --shadow-md: 0 15px 40px rgba(0, 0, 0, 0.8);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        /* Contenedor tipo celular con hardware acceleration activo */
+        .container {
+            width: 100%;
+            max-width: 480px;
+            min-height: 100vh;
+            padding-bottom: calc(110px + env(safe-area-inset-bottom)); 
+            position: relative;
+            box-shadow: var(--shadow-md);
+            border-left: 1px solid #1a120c;
+            border-right: 1px solid #1a120c;
+            overflow-x: hidden;
+            background-image: url('fondo-madera.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            /* Se removió background-attachment para evitar repaints en scroll */
+            will-change: transform; 
+        }
+
+        /* Filtro translúcido optimizado */
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(12, 9, 7, 0.75); 
+            z-index: 1;
+            pointer-events: none; 
+        }
+
+        header, nav, main, .cta-container {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Header con contención de pintura */
+        header {
+            text-align: center;
+            padding: 55px 20px 30px 20px;
+            position: relative;
+            overflow: hidden;
+            isolation: isolate; 
+            contain: paint; /* Optimiza el renderizado aislando el fuego */
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('fuego-header.gif');
+            background-size: cover;
+            background-position: center bottom;
+            background-repeat: no-repeat;
+            z-index: 0;
+        }
+
+        /* Video de fondo opcional: si no existen fuego-header.mp4/webm, el elemento
+           queda transparente y se sigue viendo el GIF de header::before de abajo.
+           Un video pesa muchísimo menos que un GIF equivalente. */
+        .header-bg-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center bottom;
+            z-index: 0;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.75) 100%);
+            z-index: 1;
+        }
+
+        header > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        .brand-logo {
+            width: auto;
+            height: 90px;
+            max-width: 100%;
+            object-fit: contain;
+            margin: 0 auto 18px auto;
+            display: block;
+        }
+
+        header h1 {
+            font-family: 'Rye', serif;
+            font-size: 28px;
+            font-weight: 400;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+            color: var(--text-main);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+        }
+
+        header p {
+            font-size: 13px;
+            color: var(--accent);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Opacidad fija en vez de blur pesado para móviles */
+        .categories-nav {
+            position: sticky;
+            top: 0;
+            background: rgba(18, 14, 11, 0.98); /* Fondo sólido/oscuro sin blur */
+            padding: 14px 16px;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            white-space: nowrap;
+            border-top: 2px solid var(--chalk-line);
+            border-bottom: 2px solid var(--chalk-line);
+            z-index: 100;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch; 
+        }
+
+        .categories-nav::-webkit-scrollbar { display: none; }
+        .categories-nav { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .nav-btn {
+            background: transparent;
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 13px 16px;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.2s ease, border-color 0.2s ease; /* Transiciones específicas */
+            border: 1px solid transparent;
+        }
+
+        .nav-btn:hover {
+            color: var(--text-main);
+            border: 1px dashed var(--chalk-line);
+        }
+
+        .nav-btn.active {
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+
+        /* Se eliminó la animación fadeIn por ítem que causaba lag al renderizar en lote */
+        .menu-section {
+            padding: 35px 24px 5px 24px;
+            scroll-margin-top: 75px;
+        }
+
+        .section-title {
+            font-family: 'Rye', serif;
+            font-size: 18px;
+            font-weight: 400;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .section-title::before, .section-title::after {
+            content: '';
+            flex: 1;
+            height: 3px;
+            border-top: 1px solid var(--chalk-line);
+            border-bottom: 1px solid var(--chalk-line);
+        }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 18px 8px;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+            gap: 15px;
+            transition: background-color 0.2s ease; /* Optimizado */
+        }
+
+        .menu-item.selected {
+            background-color: rgba(243, 112, 33, 0.08);
+            border-bottom: 1px solid var(--accent);
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: color 0.2s ease;
+        }
+
+        .menu-item.selected .item-title,
+        .menu-item:hover .item-title {
+            color: var(--accent);
+        }
+
+        .item-description {
+            font-size: 13px;
+            color: #bfaea3; 
+            line-height: 1.5;
+            font-weight: 400;
+        }
+
+        .item-action-zone {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .item-price {
+            font-family: 'Rye', serif;
+            font-size: 15px;
+            color: var(--text-main);
+            white-space: nowrap;
+            background: transparent;
+            border: 1px solid var(--chalk-line);
+            padding: 4px 10px;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .menu-item.selected .item-price {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #000;
+        }
+
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0,0,0,0.4);
+            border: 1px dashed rgba(255,255,255,0.3);
+            padding: 2px;
+        }
+
+        .qty-btn {
+            background: transparent;
+            color: var(--text-main);
+            border: none;
+            width: 44px;
+            height: 44px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+        }
+
+        .qty-number {
+            min-width: 20px;
+            text-align: center;
+        }
+
+      .cta-container {
+            position: fixed;
+            bottom: calc(24px + env(safe-area-inset-bottom));
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px; /* Se acopla exactamente al ancho de tu menú */
+            padding: 0 24px;
+            z-index: 999;
+        }
+
+        /* Skeleton loader: se muestra mientras carga el Sheet, para que el sitio
+           se sienta rápido en vez de mostrar la pantalla en blanco */
+        .skeleton-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 8px;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+            gap: 15px;
+        }
+
+        .skeleton-block {
+            background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.12) 37%, rgba(255,255,255,0.06) 63%);
+            background-size: 400% 100%;
+            animation: skeleton-shimmer 1.4s ease infinite;
+            border-radius: 2px;
+        }
+
+        .skeleton-text { flex: 1; }
+        .skeleton-title { height: 14px; width: 60%; margin-bottom: 10px; }
+        .skeleton-desc { height: 11px; width: 85%; }
+        .skeleton-price { height: 30px; width: 78px; flex-shrink: 0; }
+
+        @keyframes skeleton-shimmer {
+            0% { background-position: 100% 50%; }
+            100% { background-position: 0 50%; }
+        }
+
+        .whatsapp-btn {
+            width: 100%;
+            background-color: var(--text-main);
+            color: #121212;
+            text-decoration: none;
+            text-align: center;
+            padding: 16px;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border: 2px solid var(--text-main);
+            /* Cambiamos las transiciones para no romper la posición fija en móviles */
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+            will-change: background-color; 
+        }
+
+        .whatsapp-btn.has-items {
+            background-color: var(--accent);
+            border-color: var(--accent);
+            color: #ffffff;
+        }
+
+        @media (hover: hover) {
+            .whatsapp-btn:hover {
+                background-color: var(--accent);
+                border-color: var(--accent);
+                color: white;
+                transform: translateY(-2px);
+            }
+        }
+
+        .whatsapp-btn:active {
+            transform: scale(0.97);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <video class="header-bg-video" autoplay muted loop playsinline aria-hidden="true">
+                <source src="fuego-header.webm" type="video/webm">
+                <source src="fuego-header.mp4" type="video/mp4">
+            </video>
+            <img src="logo.png" alt="Logo de la empresa" class="brand-logo">
+            <h1 id="brand-name">Nombre de tu Marca</h1>
+            <p id="brand-tagline">Tu frase o especialidad aquí</p>
+        </header>
+
+        <nav class="categories-nav" id="categories-nav"></nav>
+
+        <main id="menu-container"></main>
+
+    </div> <div class="cta-container">
+        <a href="#" id="whatsapp-link" target="_blank" class="whatsapp-btn">
+            <span id="cta-text">&#x1F4F1; Hacer Pedido por WhatsApp</span>
+        </a>
+    </div>
+
+   <script>
+        // ==========================================
+        //  CONFIGURA LOS DATOS DE TU NEGOCIO AQUÍ
+        // ==========================================
+        const businessConfig = {
+            name: "Lo de Juanilo",
+            tagline: "Hacé tu pedido y te lo llevamos",
+            whatsappNumber: "5493534418865", 
+            defaultMessage: "¡Hola! Vi el menú en Instagram y me gustaría hacer un pedido.",
+            // 🔗 ASEGÚRATE DE QUE INCLUYA EL /pub?gid=0&output=csv AL FINAL:
+            sheetsCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQvjBS3dJqwuOe5IbSMM7fHK296z_OJ0LtkD_3wDlJa7GUqEt5GJ50WylT5cS6XbU1wiB0K2O0qAkMr/pub?gid=0&output=csv" 
+        };
+
+        const cart = {};
+
+        function parsePrice(priceString) {
+            // Formato argentino: el punto es separador de miles y la coma es de decimales.
+            // Ej: "$30.000,00" -> quitamos todo lo que no sea número, punto o coma,
+            // luego quitamos los puntos (miles) y convertimos la coma en punto decimal.
+            let clean = String(priceString).replace(/[^0-9.,]/g, '');
+            clean = clean.replace(/\./g, '').replace(',', '.');
+            const value = parseFloat(clean);
+            return isNaN(value) ? 0 : Math.round(value);
+        }
+
+        function formatPrice(number) {
+            return '$' + number.toLocaleString('es-AR');
+        }
+
+        function isMobileDevice() {
+            return /Android|iPhone|iPad|iPod|Mobile|Windows Phone/i.test(navigator.userAgent);
+        }
+        const useEmojis = isMobileDevice();
+
+        function updateWhatsAppButton() {
+            const wppLink = document.getElementById("whatsapp-link");
+            const ctaText = document.getElementById("cta-text");
+            
+            let totalItems = 0;
+            let totalPrice = 0;
+            let itemsText = "";
+
+            for (const id in cart) {
+                if (cart[id].qty > 0) {
+                    totalItems += cart[id].qty;
+                    const subtotal = cart[id].qty * cart[id].numericPrice;
+                    totalPrice += subtotal;
+                    itemsText += `• *${cart[id].qty}x* ${cart[id].title} (${formatPrice(subtotal)})\n`;
+                }
+            }
+
+            if (totalItems > 0) {
+                wppLink.classList.add("has-items");
+                ctaText.innerText = `${String.fromCodePoint(0x1F4F1)} Enviar Pedido (${formatPrice(totalPrice)})`;
+
+                const emojiCarrito = useEmojis ? String.fromCodePoint(0x1F6D2) + ' ' : ''; 
+                const emojiDinero = useEmojis ? String.fromCodePoint(0x1F4B0) + ' ' : '';  
+                const emojiUbicacion = useEmojis ? String.fromCodePoint(0x1F4CD) + ' ' : ''; 
+
+                const customMessage = `${emojiCarrito}*¡Hola ${businessConfig.name}! Quisiera hacer el siguiente pedido:*\n\n${itemsText}\n${emojiDinero}*Total: ${formatPrice(totalPrice)}*\n\n${emojiUbicacion}_¿Me confirman la demora? Gracias!_`;
+                wppLink.href = `https://wa.me/${businessConfig.whatsappNumber}?text=${encodeURIComponent(customMessage)}`;
+            } else {
+                wppLink.classList.remove("has-items");
+                ctaText.innerText = `${String.fromCodePoint(0x1F4F1)} Hacer Pedido por WhatsApp`;
+                wppLink.href = `https://wa.me/${businessConfig.whatsappNumber}?text=${encodeURIComponent(businessConfig.defaultMessage)}`;
+            }
+        }
+
+        function renderSkeleton(menuContainer) {
+            menuContainer.innerHTML = "";
+            for (let i = 0; i < 4; i++) {
+                const item = document.createElement("div");
+                item.className = "skeleton-item";
+                item.innerHTML = `
+                    <div class="skeleton-text">
+                        <div class="skeleton-block skeleton-title"></div>
+                        <div class="skeleton-block skeleton-desc"></div>
+                    </div>
+                    <div class="skeleton-block skeleton-price"></div>
+                `;
+                menuContainer.appendChild(item);
+            }
+        }
+
+        function renderMenu(menuData, navContainer, menuContainer) {
+            navContainer.innerHTML = "";
+            menuContainer.innerHTML = "";
+
+            menuData.forEach((section, index) => {
+                const sectionId = `section-${index}`;
+
+                const navBtn = document.createElement("a");
+                navBtn.href = `#${sectionId}`;
+                navBtn.className = "nav-btn";
+                navBtn.dataset.sectionId = sectionId;
+                navBtn.innerText = section.category;
+                navContainer.appendChild(navBtn);
+
+                const menuSection = document.createElement("section");
+                menuSection.className = "menu-section";
+                menuSection.id = sectionId;
+
+                const title = document.createElement("h2");
+                title.className = "section-title";
+                title.innerText = section.category;
+                menuSection.appendChild(title);
+
+                section.items.forEach(item => {
+                    const itemDiv = document.createElement("div");
+                    itemDiv.className = "menu-item";
+                    itemDiv.id = `item-${item.id}`;
+
+                    itemDiv.innerHTML = `
+                        <div class="item-details">
+                            <div class="item-title">${item.title}</div>
+                            <div class="item-description">${item.description}</div>
+                        </div>
+                        <div class="item-action-zone">
+                            <div class="item-price">${item.price}</div>
+                            <div class="quantity-selector">
+                                <button class="qty-btn" onclick="changeQuantity('${item.id}', -1, '${item.title}', '${item.price}')">-</button>
+                                <span class="qty-number" id="qty-${item.id}">0</span>
+                                <button class="qty-btn" onclick="changeQuantity('${item.id}', 1, '${item.title}', '${item.price}')">+</button>
+                            </div>
+                        </div>
+                    `;
+                    menuSection.appendChild(itemDiv);
+                });
+
+                menuContainer.appendChild(menuSection);
+            });
+
+            setupScrollSpy();
+        }
+
+        function setupScrollSpy() {
+            const sections = document.querySelectorAll(".menu-section");
+            const navBtns = document.querySelectorAll(".nav-btn");
+            if (!sections.length || !navBtns.length) return;
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navBtns.forEach(btn => btn.classList.remove("active"));
+                        const activeBtn = document.querySelector(`.nav-btn[data-section-id="${entry.target.id}"]`);
+                        if (activeBtn) {
+                            activeBtn.classList.add("active");
+                            activeBtn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+                        }
+                    }
+                });
+            }, { rootMargin: "-90px 0px -70% 0px", threshold: 0 });
+
+            sections.forEach(section => observer.observe(section));
+        }
+
+        window.changeQuantity = function(id, change, title, priceStr) {
+            if (!cart[id]) {
+                cart[id] = {
+                    qty: 0,
+                    title: title,
+                    numericPrice: parsePrice(priceStr)
+                };
+            }
+
+            cart[id].qty += change;
+
+            if (cart[id].qty <= 0) {
+                delete cart[id];
+                document.getElementById(`qty-${id}`).innerText = "0";
+                document.getElementById(`item-${id}`).classList.remove("selected");
+            } else {
+                document.getElementById(`qty-${id}`).innerText = cart[id].qty;
+                document.getElementById(`item-${id}`).classList.add("selected");
+            }
+
+            updateWhatsAppButton();
+        }
+
+        // Parser de CSV correcto: respeta comillas y NO separa por espacios,
+        // así los títulos y descripciones con varias palabras quedan intactos.
+        function parseCSVRows(text) {
+            const rows = [];
+            let row = [];
+            let field = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const next = text[i + 1];
+
+                if (inQuotes) {
+                    if (char === '"' && next === '"') {
+                        field += '"';
+                        i++;
+                    } else if (char === '"') {
+                        inQuotes = false;
+                    } else {
+                        field += char;
+                    }
+                } else {
+                    if (char === '"') {
+                        inQuotes = true;
+                    } else if (char === ',') {
+                        row.push(field);
+                        field = '';
+                    } else if (char === '\r') {
+                        // ignorado, el salto de línea real se maneja con \n
+                    } else if (char === '\n') {
+                        row.push(field);
+                        rows.push(row);
+                        row = [];
+                        field = '';
+                    } else {
+                        field += char;
+                    }
+                }
+            }
+
+            if (field.length > 0 || row.length > 0) {
+                row.push(field);
+                rows.push(row);
+            }
+
+            return rows;
+        }
+
+        function parseCSV(text) {
+            const allRows = parseCSVRows(text);
+            if (allRows.length === 0) return [];
+
+            // Ignoramos la primera fila de encabezados
+            const rows = allRows.slice(1);
+
+            const categoriesMap = {};
+            const categoryOrder = [];
+
+            rows.forEach(cols => {
+                const category = (cols[0] || '').trim();
+                const id = (cols[1] || '').trim();
+                const title = (cols[2] || '').trim();
+                const description = (cols[3] || '').trim();
+                const price = (cols[4] || '').trim();
+
+                // Ignoramos filas vacías o incompletas (por ejemplo, filas en blanco del Sheet)
+                if (!category || !id || !title || !price) return;
+
+                if (!categoriesMap[category]) {
+                    categoriesMap[category] = [];
+                    categoryOrder.push(category);
+                }
+                categoriesMap[category].push({ id, title, description, price });
+            });
+
+            // Convertimos el mapa estructurado al formato exacto que usaba tu menú original
+            return categoryOrder.map(categoryName => ({
+                category: categoryName,
+                items: categoriesMap[categoryName]
+            }));
+        }
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            document.getElementById("brand-name").innerText = businessConfig.name;
+            document.getElementById("brand-tagline").innerText = businessConfig.tagline;
+            updateWhatsAppButton();
+
+            const navContainer = document.getElementById("categories-nav");
+            const menuContainer = document.getElementById("menu-container");
+
+            // Validamos que se haya configurado el enlace
+            if(businessConfig.sheetsCsvUrl === "TU_ENLACE_CSV_AQUI") {
+                menuContainer.innerHTML = "<p style='text-align:center; padding:20px; color:var(--accent);'>⚠️ Error: Falta configurar el enlace de Google Sheets.</p>";
+                return;
+            }
+
+            // Si hay un menú guardado de una visita anterior, lo mostramos al instante
+            // mientras se busca la versión actualizada en segundo plano (stale-while-revalidate)
+            const CACHE_KEY = "menu-cache-v1";
+            let cachedMenu = null;
+            try {
+                const cached = localStorage.getItem(CACHE_KEY);
+                if (cached) cachedMenu = JSON.parse(cached);
+            } catch (e) {
+                cachedMenu = null;
+            }
+
+            if (cachedMenu && cachedMenu.length) {
+                renderMenu(cachedMenu, navContainer, menuContainer);
+            } else {
+                renderSkeleton(menuContainer);
+            }
+
+            try {
+                // Buscamos los datos en tiempo real de Google Sheets
+                const response = await fetch(businessConfig.sheetsCsvUrl, { cache: "no-store" });
+                const csvText = await response.text();
+                const menuData = parseCSV(csvText);
+
+                if (!menuData.length) {
+                    throw new Error("El menú vino vacío");
+                }
+
+                // Solo volvemos a pintar si los datos cambiaron, para no interrumpir
+                // al usuario si ya está mirando el menú cacheado
+                const changed = JSON.stringify(menuData) !== JSON.stringify(cachedMenu);
+                if (changed) {
+                    renderMenu(menuData, navContainer, menuContainer);
+                }
+
+                try {
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(menuData));
+                } catch (e) {
+                    // Si localStorage no está disponible (modo privado, etc.), no pasa nada grave
+                }
+
+            } catch (error) {
+                console.error("Error cargando el menú desde Google Sheets:", error);
+                if (cachedMenu && cachedMenu.length) {
+                    // Ya se está mostrando el menú cacheado, no hace falta romper la experiencia
+                } else {
+                    menuContainer.innerHTML = "<p style='text-align:center; padding:20px;'>Ocurrió un error al cargar el menú. Por favor, reintenta más tarde.</p>";
+                }
+            }
+        });
+    </script>
+</body>
+</html>
